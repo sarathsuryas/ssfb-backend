@@ -1,0 +1,11 @@
+// Prisma schema. Add domain models here as feature modules are introduced.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
