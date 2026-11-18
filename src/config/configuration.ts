@@ -12,6 +12,9 @@ export interface AppConfiguration {
   cookies: {
     secure: boolean;
   };
+  cors: {
+    origins: string[];
+  };
 }
 
 /**
@@ -37,6 +40,12 @@ export default (): AppConfiguration => {
     },
     cookies: {
       secure: nodeEnv === 'production',
+    },
+    cors: {
+      origins: (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
     },
   };
 };

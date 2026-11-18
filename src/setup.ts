@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { ACCESS_COOKIE, CSRF_COOKIE } from './common/cookies.js';
@@ -6,6 +7,24 @@ import { ACCESS_COOKIE, CSRF_COOKIE } from './common/cookies.js';
 /** Application-wide bootstrap configuration. */
 export function configureApp(app: INestApplication): void {
   app.use(cookieParser());
+
+  const config = app.get(ConfigService);
+  const origins = config.get<string[]>('cors.origins') ?? [];
+
+  app.enableCors({
+    origin: (
+      requestOrigin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) => {
+      // Requests without an Origin (curl, server-to-server) are not browser-enforced.
+      callback(null, !requestOrigin || origins.includes(requestOrigin));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'X-CSRF-Token', 'Authorization'],
+    maxAge: 600,
+  });
+
   app.setGlobalPrefix('api', { exclude: ['health', 'health/{*path}'] });
 
   const swaggerConfig = new DocumentBuilder()

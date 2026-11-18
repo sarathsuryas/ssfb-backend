@@ -85,6 +85,15 @@ curl -b cookies.txt -X POST -H "X-CSRF-Token: $CSRF" -H 'Content-Type: applicati
   http://localhost:3000/api/admin/staff
 ```
 
+## CORS
+
+Browser access is restricted to the origins in `CORS_ORIGINS` (comma-separated,
+default `http://localhost:4200`). Credentials are allowed so the Angular app can send
+the httpOnly session cookies; `X-CSRF-Token` is an allowed request header for
+state-changing calls. Keep cookie `SameSite=Strict` while the frontend and API are on
+the same site; cross-site deployments would need `SameSite=None; Secure` instead.
+CORS is not an authorization control — the JWT, role and CSRF guards still apply.
+
 ## Conventions
 
 - Business routes are served under `/api`; `/health` and `/docs` are excluded from the prefix.
@@ -98,16 +107,17 @@ curl -b cookies.txt -X POST -H "X-CSRF-Token: $CSRF" -H 'Content-Type: applicati
 
 Validated at startup with zod — the app fails fast if a value is missing or invalid.
 
-| Variable                    | Required  | Default       | Notes                               |
-| --------------------------- | --------- | ------------- | ----------------------------------- |
-| `NODE_ENV`                  | no        | `development` | `development`, `test`, `production` |
-| `PORT`                      | no        | `3000`        | positive integer                    |
-| `DATABASE_URL`              | yes       | —             | PostgreSQL connection string        |
-| `JWT_SECRET`                | yes       | —             | at least 16 characters              |
-| `JWT_EXPIRES_IN`            | no        | `15m`         | access token lifetime               |
-| `REFRESH_TOKEN_TTL_SECONDS` | no        | `604800`      | refresh token lifetime (7 days)     |
-| `SEED_ADMIN_EMAIL`          | seed only | —             | first ADMIN email                   |
-| `SEED_ADMIN_PASSWORD`       | seed only | —             | first ADMIN password                |
+| Variable                    | Required  | Default                 | Notes                               |
+| --------------------------- | --------- | ----------------------- | ----------------------------------- |
+| `NODE_ENV`                  | no        | `development`           | `development`, `test`, `production` |
+| `PORT`                      | no        | `3000`                  | positive integer                    |
+| `CORS_ORIGINS`              | no        | `http://localhost:4200` | comma-separated allowlist           |
+| `DATABASE_URL`              | yes       | —                       | PostgreSQL connection string        |
+| `JWT_SECRET`                | yes       | —                       | at least 16 characters              |
+| `JWT_EXPIRES_IN`            | no        | `15m`                   | access token lifetime               |
+| `REFRESH_TOKEN_TTL_SECONDS` | no        | `604800`                | refresh token lifetime (7 days)     |
+| `SEED_ADMIN_EMAIL`          | seed only | —                       | first ADMIN email                   |
+| `SEED_ADMIN_PASSWORD`       | seed only | —                       | first ADMIN password                |
 
 `Secure` is set on cookies automatically when `NODE_ENV=production`.
 

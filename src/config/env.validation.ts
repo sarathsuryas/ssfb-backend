@@ -11,6 +11,16 @@ export const envSchema = z.object({
     .min(16, 'JWT_SECRET must be at least 16 characters long'),
   JWT_EXPIRES_IN: z.string().min(1).default('15m'),
   REFRESH_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(604800),
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:4200')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    )
+    .refine((origins) => origins.length > 0, 'CORS_ORIGINS must not be empty'),
 });
 
 export type Env = z.infer<typeof envSchema>;
