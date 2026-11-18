@@ -7,6 +7,10 @@ export interface AppConfiguration {
   jwt: {
     secret: string;
     expiresIn: string;
+    refreshTtlSeconds: number;
+  };
+  cookies: {
+    secure: boolean;
   };
 }
 
@@ -14,15 +18,25 @@ export interface AppConfiguration {
  * Values have already been validated by `validateEnv`, so the fallbacks here
  * only exist to keep the factory's return type non-nullable.
  */
-export default (): AppConfiguration => ({
-  port: Number(process.env.PORT ?? 3000),
-  nodeEnv: (process.env.NODE_ENV ??
-    'development') as AppConfiguration['nodeEnv'],
-  database: {
-    url: process.env.DATABASE_URL ?? '',
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET ?? '',
-    expiresIn: process.env.JWT_EXPIRES_IN ?? '1h',
-  },
-});
+export default (): AppConfiguration => {
+  const nodeEnv = (process.env.NODE_ENV ??
+    'development') as AppConfiguration['nodeEnv'];
+
+  return {
+    port: Number(process.env.PORT ?? 3000),
+    nodeEnv,
+    database: {
+      url: process.env.DATABASE_URL ?? '',
+    },
+    jwt: {
+      secret: process.env.JWT_SECRET ?? '',
+      expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
+      refreshTtlSeconds: Number(
+        process.env.REFRESH_TOKEN_TTL_SECONDS ?? 604800,
+      ),
+    },
+    cookies: {
+      secure: nodeEnv === 'production',
+    },
+  };
+};

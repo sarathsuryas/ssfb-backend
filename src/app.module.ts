@@ -5,6 +5,7 @@ import { CommonModule } from './common/common.module.js';
 import { AppConfigModule } from './config/config.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
+import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { HealthModule } from './health/health.module.js';
     DatabaseModule,
     CommonModule,
     AuthModule,
+    UsersModule,
     HealthModule,
   ],
   controllers: [AppController],

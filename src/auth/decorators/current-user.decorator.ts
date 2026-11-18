@@ -1,12 +1,12 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
-import type { JwtPayload } from '../strategies/jwt.strategy.js';
+import type { PublicUser } from '../../modules/users/users.service.js';
 
 export const CurrentUser = createParamDecorator(
-  (_data: unknown, context: ExecutionContext): JwtPayload | undefined => {
+  (_data: unknown, context: ExecutionContext): PublicUser | undefined => {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user?: JwtPayload }>();
+      .getRequest<Request & { user?: PublicUser }>();
     return request.user;
   },
 );
