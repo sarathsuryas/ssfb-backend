@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-/** Shared bootstrap configuration so tests exercise the same setup as the server. */
+/** Application-wide bootstrap configuration. */
 export function configureApp(app: INestApplication): void {
   app.setGlobalPrefix('api', { exclude: ['health', 'health/*'] });
 
