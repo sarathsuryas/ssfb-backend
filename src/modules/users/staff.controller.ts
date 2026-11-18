@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator.js';
 import { Roles } from '../../auth/decorators/roles.decorator.js';
@@ -16,5 +16,11 @@ export class StaffController {
   @ApiOperation({ summary: 'Create a customer account (admin or staff)' })
   createCustomer(@CurrentUser() actor: PublicUser, @Body() dto: CreateUserDto) {
     return this.usersService.createUser(actor, Role.CUSTOMER, dto);
+  }
+
+  @Get('customers')
+  @ApiOperation({ summary: 'List customer accounts (admin or staff)' })
+  listCustomers() {
+    return this.usersService.findByRole(Role.CUSTOMER);
   }
 }

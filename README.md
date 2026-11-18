@@ -43,6 +43,10 @@ provisioned by an authenticated user:
 | `ADMIN`, `STAFF` | CUSTOMER   | `POST /api/staff/customers` |
 | `CUSTOMER`       | —          | —                           |
 
+Staff can list the accounts they manage with `GET /api/staff/customers`. The endpoint
+returns only `CUSTOMER` users, newest first. `GET /api/users` remains the ADMIN/STAFF
+view of all accounts.
+
 The first ADMIN is created with `npm run prisma:seed`. Permissions are enforced both
 by the global `RolesGuard` (`@Roles(...)`) and by `UsersService.createUser`, which also
 records `createdById` for audit. A role is never accepted from a request body. Roles

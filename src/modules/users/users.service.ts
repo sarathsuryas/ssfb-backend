@@ -51,6 +51,14 @@ export class UsersService {
     return users.map((user) => this.toPublicUser(user));
   }
 
+  async findByRole(role: Role): Promise<PublicUser[]> {
+    const users = await this.prisma.user.findMany({
+      where: { role },
+      orderBy: { createdAt: 'desc' },
+    });
+    return users.map((user) => this.toPublicUser(user));
+  }
+
   async createUser(
     actor: PublicUser,
     targetRole: Role,
