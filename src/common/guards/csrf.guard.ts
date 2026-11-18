@@ -25,7 +25,7 @@ export class CsrfGuard implements CanActivate {
     }
 
     const path = (request.originalUrl ?? request.url).split('?')[0];
-    if (path.endsWith('/auth/register') || path.endsWith('/auth/login')) {
+    if (path.endsWith('/auth/login')) {
       return true;
     }
 

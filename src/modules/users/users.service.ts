@@ -1,9 +1,26 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client.js';
-import type { User } from '../../generated/prisma/client.js';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../database/prisma.service.js';
+import { Prisma, Role } from '../../generated/prisma/client.js';
+import type { User } from '../../generated/prisma/client.js';
+import type { CreateUserDto } from './dto/create-user.dto.js';
 
-export type PublicUser = Pick<User, 'id' | 'email' | 'createdAt' | 'updatedAt'>;
+export type PublicUser = Pick<
+  User,
+  'id' | 'email' | 'role' | 'createdAt' | 'updatedAt'
+>;
+
+const PROVISIONING_RIGHTS: Record<Role, Role[]> = {
+  [Role.ADMIN]: [Role.STAFF, Role.CUSTOMER],
+  [Role.STAFF]: [Role.CUSTOMER],
+  [Role.CUSTOMER]: [],
+};
+
+const SALT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
@@ -13,6 +30,7 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -33,9 +51,29 @@ export class UsersService {
     return users.map((user) => this.toPublicUser(user));
   }
 
-  async create(email: string, passwordHash: string): Promise<User> {
+  async createUser(
+    actor: PublicUser,
+    targetRole: Role,
+    dto: CreateUserDto,
+  ): Promise<PublicUser> {
+    if (!PROVISIONING_RIGHTS[actor.role].includes(targetRole)) {
+      throw new ForbiddenException(
+        `${actor.role} cannot create ${targetRole} accounts`,
+      );
+    }
+
+    const email = dto.email.trim().toLowerCase();
+
     try {
-      return await this.prisma.user.create({ data: { email, passwordHash } });
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          passwordHash: await bcrypt.hash(dto.password, SALT_ROUNDS),
+          role: targetRole,
+          createdById: actor.id,
+        },
+      });
+      return this.toPublicUser(user);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes } from 'node:crypto';
@@ -25,7 +21,6 @@ import {
 } from '../modules/users/users.service.js';
 import type { ChangePasswordDto } from './dto/change-password.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
-import type { RegisterDto } from './dto/register.dto.js';
 import type { JwtPayload } from './interfaces/jwt-payload.js';
 
 const SALT_ROUNDS = 12;
@@ -39,22 +34,6 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
   ) {}
-
-  async register(
-    dto: RegisterDto,
-    res: Response,
-  ): Promise<{ user: PublicUser }> {
-    const email = dto.email.trim().toLowerCase();
-
-    if (await this.usersService.findByEmail(email)) {
-      throw new ConflictException('Email already in use');
-    }
-
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    const user = await this.usersService.create(email, passwordHash);
-
-    return this.issueSession(user, res);
-  }
 
   async login(dto: LoginDto, res: Response): Promise<{ user: PublicUser }> {
     const user = await this.usersService.findByEmail(
