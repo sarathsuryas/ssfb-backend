@@ -14,17 +14,39 @@ enum Role {
   CUSTOMER
 }
 
+enum AccountStatus {
+  ACTIVE
+  CLOSED
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String
-  role          Role           @default(CUSTOMER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id               String         @id @default(uuid())
+  email            String         @unique
+  passwordHash     String
+  role             Role           @default(CUSTOMER)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  createdById      String?
+  createdBy        User?          @relation("UserCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdUsers     User[]         @relation("UserCreator")
+  refreshTokens    RefreshToken[]
+  customerAccounts BankAccount[]  @relation("CustomerAccounts")
+  createdAccounts  BankAccount[]  @relation("AccountCreator")
+}
+
+model BankAccount {
+  id            String        @id @default(uuid())
+  accountNumber String        @unique
+  customerId    String
+  customer      User          @relation("CustomerAccounts", fields: [customerId], references: [id], onDelete: Restrict)
+  balanceMinor  BigInt        @default(0)
+  status        AccountStatus @default(ACTIVE)
   createdById   String?
-  createdBy     User?          @relation("UserCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  createdUsers  User[]         @relation("UserCreator")
-  refreshTokens RefreshToken[]
+  createdBy     User?         @relation("AccountCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([customerId])
 }
 
 model RefreshToken {

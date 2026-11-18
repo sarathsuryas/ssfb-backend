@@ -52,6 +52,22 @@ by the global `RolesGuard` (`@Roles(...)`) and by `UsersService.createUser`, whi
 records `createdById` for audit. A role is never accepted from a request body. Roles
 are read from the database on every request, so changes take effect immediately.
 
+## Bank accounts
+
+`ADMIN` and `STAFF` open accounts for an existing `CUSTOMER`; a customer cannot open
+one themselves. Accounts have one generic type, start `ACTIVE`, and have a unique
+10-digit `accountNumber`. The actor's id is recorded as `createdById`.
+
+| Method | Endpoint                                | Purpose                            |
+| ------ | --------------------------------------- | ---------------------------------- |
+| `POST` | `/api/staff/accounts`                   | Open an account for a customer     |
+| `GET`  | `/api/staff/accounts?customerId=<uuid>` | List accounts, optionally by owner |
+
+`POST` body: `{ "customerId": "<uuid>", "openingBalanceMinor": "0" }`. Balances are
+stored as integer minor units (Postgres `bigint`) and returned as strings to avoid
+floating-point errors — `"150000"` means 1,500.00. `openingBalanceMinor` is optional
+and defaults to `"0"`; there are no transactions yet.
+
 ## Authentication
 
 Sessions use two httpOnly cookies: `access_token` (15 min, sent to all routes) and

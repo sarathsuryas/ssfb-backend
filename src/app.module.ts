@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
+import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CommonModule } from './common/common.module.js';
 import { AppConfigModule } from './config/config.module.js';
@@ -14,6 +15,7 @@ import { UsersModule } from './modules/users/users.module.js';
     CommonModule,
     AuthModule,
     UsersModule,
+    AccountsModule,
     HealthModule,
   ],
   controllers: [AppController],
